@@ -1,24 +1,19 @@
 require 'roda'
+require 'graphql'
 
-load 'db.rb'
+require_relative 'graphql/app_schema'
 
 class App < Roda
   plugin :json
+  plugin :json_parser, parser: proc{|input| JSON.parse(input, symbolize_names: true)}
+  plugin :indifferent_params
 
   route do |r|
-    @users_repo = UsersRepo.new(USERS)
-    @projects_repo = ProjectsRepo.new(PROJECTS)
-    @project_tasks_repo = ProjectTasksRepo.new(PROJECT_TASKS)
-
-    r.is "users" do
-      r.get do
-        @users_repo.all
-      end
-    end
-
-    r.is "users", Integer do |id|
-      r.get do
-        @users_repo[id]
+    r.is "graphql" do
+      r.post do
+        AppSchema.execute(
+          params[:query]
+        ).to_h
       end
     end
   end

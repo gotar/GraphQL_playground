@@ -33,10 +33,14 @@ class Repo
   end
 
   def [](id)
-    dataset.find{|x| x[:id] == id}
+    dataset.find{|x| x[:id] == id.to_i}
   end
 end
 
-class UsersRepo < Repo; end
+class UsersRepo < Repo
+  def projects_for_user(user_id)
+    ProjectsRepo.new(PROJECTS).all.select{|p| p[:user_id] == user_id.to_i }
+  end
+end
 class ProjectsRepo < Repo; end
 class ProjectTasksRepo < Repo; end
